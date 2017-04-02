@@ -1,3 +1,5 @@
+require 'tempfile'
+
 module RayyanFormats
   class Base
     MAX_SKIP_LINES = 10
@@ -32,7 +34,7 @@ module RayyanFormats
         if arguments.length == 0
           @format_detect_block = block
         else
-          Rails.logger.debug "Detecting #{self.title}"
+          # Rails.logger.debug "Detecting #{self.title}"
           @format_detect_block.call(*arguments, &block)
         end
       end
@@ -103,8 +105,7 @@ module RayyanFormats
       end
 
       def detect_import_format(fileContent)
-        utf8 = detect_encoding_convert(fileContent)
-        lines = utf8.split(/\n\r|\r\n|\n|\r/)
+        lines = fileContent.split(/\n\r|\r\n|\n|\r/)
         raise 'Empty file' if lines.length == 0
         detect_import_format_recursive(lines, 0)
       end
@@ -124,27 +125,6 @@ module RayyanFormats
         else
           raise "Unsupported file contents, please use a proper way to export your files into one of these formats: #{extensions_str}"
         end
-      end
-
-      def detect_encoding_convert(body)
-        # write body in a file
-        infile = Tempfile.new ''
-        infile.binmode
-        infile.write(body)
-        infile.close
-        # create empty outfile
-        outfile = Tempfile.new ''
-        outfile.close
-
-        # call thrift detect
-        encoding = nil
-        lthrift {|client|
-          encoding = client.detect_encoding_convert infile.path, outfile.path
-        }
-        body = File.read(outfile.path) if encoding != 'UTF-8'
-
-        # Remove BOM Characters
-        body.force_encoding("UTF-8").sub("\xEF\xBB\xBF", "")
       end
 
       def get_notes(val)
