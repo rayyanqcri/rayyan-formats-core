@@ -2,7 +2,7 @@ require 'csv'
 
 module RayyanFormats
   module Plugins
-    class CSV < Base
+    class CSV < RayyanFormats::Base
 
       title 'CSV'
       extension 'csv'
@@ -24,7 +24,7 @@ module RayyanFormats
         next true
       end
 
-      parse do |body, filename, &block|
+      do_import do |body, filename, &block|
         articles = ::CSV.parse(body, {:headers => true, :return_headers => false, :header_converters => :symbol, :converters => :all})
         total = articles.length
         articles.each do |article|
