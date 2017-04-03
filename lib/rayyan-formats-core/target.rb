@@ -16,5 +16,9 @@ module RayyanFormats
       @dict = {}
     end
 
+    def to_s
+      @dict.to_s
+    end
+
   end
 end

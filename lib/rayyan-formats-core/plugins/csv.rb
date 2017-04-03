@@ -28,35 +28,25 @@ module RayyanFormats
         articles = ::CSV.parse(body, {:headers => true, :return_headers => false, :header_converters => :symbol, :converters => :all})
         total = articles.length
         articles.each do |article|
-          mArticle = Article.new
-          mArticle.sid = article[:key].to_s
-          mArticle.title = article[:title].to_s
-          mArticle.jcreated_at = ScraperBase.to_date article[:year]
-          mArticle.jvolume = article[:volume].to_i rescue 0
-          mArticle.pagination = article[:pages].to_s
+          target = Target.new
+          target.sid = article[:key].to_s
+          target.title = article[:title].to_s
+          target.jcreated_at = article[:year]
+          target.jvolume = article[:volume].to_i rescue 0
+          target.pagination = article[:pages].to_s
+          target.authors = article[:authors].split(/\s*;\s*|\s*and\s*/) if article[:authors]
+          target.jissue = (article[:issue] || article[:number]).to_i rescue 0
+          target.url = article[:url].to_s
+          target.language = article[:language]
+          target.notes = try_join_arr(article[:notes])
+          target.abstracts = [article[:abstract]].compact
+          target.publication_types = ["Journal Article"]
+          target.publisher_name = article[:publisher]
+          target.publisher_location = article[:location].to_s
+          target.journal_title = article[:journal]
+          target.journal_issn = article[:issn].to_s
 
-          mArticle.insert_ordered_authors(article[:authors].split(/\s*;\s*|\s*and\s*/)) if article[:authors]
-
-          mArticle.abstracts.build content: article[:abstract] if article[:abstract]
-
-          mArticle.publication_types << PublicationType.where(name: "Journal Article").first_or_initialize
-
-          mArticle.jissue = (article[:issue] || article[:number]).to_i rescue 0
-          mArticle.url = article[:url].to_s
-
-          mArticle.publisher = Publisher.where(name: article[:publisher]).first_or_initialize {|p|
-            p.location = article[:location].to_s
-          } unless article[:publisher].blank?
-
-          journal = article[:journal]
-          mArticle.journal = Journal.where(title: journal).first_or_create {|j|
-            j.issn = article[:issn].to_s
-          } unless journal.blank?
-
-          mArticle.language = article[:language]
-          mArticle.notes = article[:notes]
-
-          block.call(mArticle, total)
+          block.call(target, total)
         end
       end
 

@@ -34,7 +34,7 @@ module RayyanFormats
         if arguments.length == 0
           @format_detect_block = block
         else
-          # Rails.logger.debug "Detecting #{self.title}"
+          logger "Detecting #{self.title}"
           @format_detect_block.call(*arguments, &block)
         end
       end
@@ -47,7 +47,7 @@ module RayyanFormats
         if arguments.length == 0
           @format_import_block = block
         else
-          # Rails.logger.debug "Inside #{self.title} parser for file: #{arguments[1] rescue ''}"
+          logger "Inside #{self.title} parser for file: #{arguments[1] rescue ''}"
           @format_import_block.call(*arguments, &block)
         end
       end
@@ -72,6 +72,14 @@ module RayyanFormats
 
       def max_file_size
         @@max_file_size rescue 10_485_760 # 10 megabytes
+      end
+
+      def logger=(value)
+        @@logger = value
+      end
+
+      def logger(message)
+        @@logger.debug(message) rescue puts message
       end
 
       def extensions_str
@@ -127,10 +135,8 @@ module RayyanFormats
         end
       end
 
-      def get_notes(val)
-        return nil if val.nil?
-        val = val.join("\n") if val.respond_to?(:join)
-        val
+      def try_join_arr(val)
+        val.join("\n") rescue val
       end
 
     end # class methods
