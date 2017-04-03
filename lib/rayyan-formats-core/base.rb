@@ -4,15 +4,6 @@ module RayyanFormats
   class Base
     MAX_SKIP_LINES = 10
 
-    # format instance easy access delegators (optional)
-    # def method_missing(method_sym, *arguments, &block)
-    #   if [:title, :extension, :description, :detect, :parse, :is_core?].include? method_sym
-    #     self.class.send(method_sym, *arguments, &block)
-    #   else
-    #     super(method_sym, *arguments, &block)
-    #   end
-    # end
-
     class << self  
       # format DSL setters/getters
       def title(*arguments, &block)
@@ -52,14 +43,19 @@ module RayyanFormats
         end
       end
 
-      def formats=(list)
+      def initialize_class(formats_list = [])
+        @@max_file_size ||= 10_485_760 # 10 megabytes
         @@text_format = RayyanFormats::Plugins::PlainText
         @@csv_format = RayyanFormats::Plugins::CSV
-        @@formats = list.reject{|klass|
+        @@formats = formats_list.reject{|klass|
           [RayyanFormats::Plugins::PlainText, RayyanFormats::Plugins::CSV].include? klass
         } << @@text_format << @@csv_format
         @@extensions_str = @@formats.map{|f| f.extension}.join(", ")
         @@formats
+      end
+
+      def formats=(list)
+        initialize_class list
       end
 
       def formats
@@ -71,7 +67,7 @@ module RayyanFormats
       end
 
       def max_file_size
-        @@max_file_size rescue 10_485_760 # 10 megabytes
+        @@max_file_size
       end
 
       def logger=(value)
@@ -91,7 +87,7 @@ module RayyanFormats
       end
 
       def match_format(ext)
-        format = @@formats.find{|f| f.extension == ext.downcase}
+        format = formats.find{|f| f.extension == ext.downcase}
         raise "Unsupported file format detected: #{ext}" if format.nil?
         # force core extensions to txt to pass by encoding and format detection filters
         return format.is_core? ? text_format : format

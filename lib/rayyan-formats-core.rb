@@ -5,5 +5,7 @@ require "rayyan-formats-core/target"
 require "rayyan-formats-core/plugins/plain_text"
 require "rayyan-formats-core/plugins/csv"
 
+RayyanFormats::Base.initialize_class
+
 module RayyanFormats
 end
