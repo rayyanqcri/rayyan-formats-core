@@ -27,6 +27,20 @@ By default, the plugin will only process files no bigger than 10 megabytes. To o
     # support files up to 100 megabytes of size
     RayyanFormats::Base.max_file_size = 104_857_600
 
+To do the actual importing of reference files:
+
+    source = RayyanFormats::Source.new("example.csv")
+    RayyanFormats::Base.import(source) { |target, total, is_new|
+      # post processing for target
+      puts "Found target: #{target}. Total: #{total}. is_new: #{is_new}"
+    }
+
+Note that RayyanFormats::Source is a proxy class. You can supply any class instance that responds to the following:
+`:name` and `:attachment`. `:name` should return the file name string ending with a proper supported extension.
+`:attachment` should return any Ruby IO object that responds to `:size` (returning file size in bytes),
+`:read` (returning the entire file contents in UTF-8 encoding) and `:close` (closes the file). An example attachment
+instance is `File.open(name)`.
+
 ## Testing
 
 Currently, there is no test suite for this gem. However, test calls can be found in `test.rb`. Just clone this repo then run it to get example usage and test all the parts manually.
