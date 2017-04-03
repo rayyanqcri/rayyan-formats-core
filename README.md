@@ -29,7 +29,9 @@ By default, the plugin will only process files no bigger than 10 megabytes. To o
 
 ## Testing
 
-    TODO
+Currently, there is no test suite for this gem. However, test calls can be found in `test.rb`. Just run it to get example usage and test all the parts manually.
+
+    ./test.rb
 
 ## Contributing
 
