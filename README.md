@@ -35,7 +35,7 @@ To do the actual importing of reference files:
       puts "Found target: #{target}. Total: #{total}. is_new: #{is_new}"
     }
 
-Note that RayyanFormats::Source is a proxy class. You can supply any class instance that responds to the following:
+Note that `RayyanFormats::Source` is a proxy class. You can supply any class instance that responds to the following:
 `:name` and `:attachment`. `:name` should return the file name string ending with a proper supported extension.
 `:attachment` should return any Ruby IO object that responds to `:size` (returning file size in bytes),
 `:read` (returning the entire file contents in UTF-8 encoding) and `:close` (closes the file). An example attachment
