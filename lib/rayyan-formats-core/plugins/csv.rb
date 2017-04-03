@@ -31,11 +31,11 @@ module RayyanFormats
           target = Target.new
           target.sid = article[:key].to_s
           target.title = article[:title].to_s
-          target.jcreated_at = article[:year]
+          target.date_array = [article[:year]]
           target.jvolume = article[:volume].to_i rescue 0
+          target.jissue = (article[:issue] || article[:number]).to_i rescue 0
           target.pagination = article[:pages].to_s
           target.authors = article[:authors].split(/\s*;\s*|\s*and\s*/) if article[:authors]
-          target.jissue = (article[:issue] || article[:number]).to_i rescue 0
           target.url = article[:url].to_s
           target.language = article[:language]
           target.notes = try_join_arr(article[:notes])
