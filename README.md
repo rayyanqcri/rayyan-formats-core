@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rayyanqcri/rayyan-formats-core.svg?branch=master)](https://travis-ci.org/rayyanqcri/rayyan-formats-core)
+
 # RayyanFormats
 
 Rayyan core plugin for import/export of reference file formats. It comes with wrapped text and CSV plugins. Similarly, more formats can be supported and enabled via the client program. Usually, reference files contain articles with common attributes like `title`, `journal`, `publication date`, `authors`, ... etc. However, these attributes are represented in different ways within different formats. The main goal of this core plugin is to abstract the syntactical and semantic extraction of these attributes. 
