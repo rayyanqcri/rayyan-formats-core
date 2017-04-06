@@ -45,9 +45,11 @@ instance is `File.open(name)`.
 
 ## Testing
 
-Currently, there is no test suite for this gem. However, test calls can be found in `test.rb`. Just clone this repo then run it to get example usage and test all the parts manually.
+    rspec
 
-    ./test.rb
+Or
+
+    rake
 
 ## Contributing
 

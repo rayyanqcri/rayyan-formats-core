@@ -1,8 +1,6 @@
 module RayyanFormats
   class Source
     attr_reader :name, :attachment
-    # attachment should be Ruby IO (responds to :size, :read and :close)
-    # if not specified, File.open(:name) is performed to get contents
 
     def name=(value)
       raise "Invalid name, must end with '.' then extension" unless value =~ /\..+/

@@ -12,21 +12,21 @@ RayyanFormats::Base.logger = logger
 
 # printing default config
 puts RayyanFormats::Base.max_file_size
-puts RayyanFormats::Base.formats
+puts RayyanFormats::Base.plugins
 
 # changing config
 RayyanFormats::Base.max_file_size = 10_000_000
-RayyanFormats::Base.formats = [RayyanFormats::Plugins::CSV]
+RayyanFormats::Base.plugins = [RayyanFormats::Plugins::CSV]
 puts RayyanFormats::Base.max_file_size
-puts RayyanFormats::Base.formats
+puts RayyanFormats::Base.plugins
 
 puts RayyanFormats::Plugins::PlainText.extension
 puts RayyanFormats::Plugins::PlainText.title
-puts RayyanFormats::Base.match_format('txt')
-puts RayyanFormats::Base.match_format('csv')
+puts RayyanFormats::Base.send(:match_plugin, 'txt')
+puts RayyanFormats::Base.send(:match_plugin, 'csv')
 begin
-  puts RayyanFormats::Base.match_format('ris')
-  puts RayyanFormats::Base.match_format('foo')
+  puts RayyanFormats::Base.send(:match_plugin, 'ris')
+  puts RayyanFormats::Base.send(:match_plugin, 'foo')
 rescue => e
   puts "Exception: #{e.message}"
 end

@@ -7,8 +7,8 @@ module RayyanFormats
       description 'Supports plain text files in one of the above mentioned formats.'
 
       do_import do |body, filename, &block|
-        format, lines = detect_import_format(body)
-        format.do_import(lines.join("\n"), filename, &block)
+        plugin, lines = detect_import_format(body)
+        plugin.do_import(lines.join("\n"), filename, &block)
       end
     end
   end
