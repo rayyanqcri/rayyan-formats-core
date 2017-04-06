@@ -32,4 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency 'rake', '~> 0'
   spec.add_development_dependency 'log4r', '~> 1.0'
+  spec.add_development_dependency 'rspec', '~> 3.5'
+  spec.add_development_dependency 'simplecov', '~> 0.14'
+
 end
