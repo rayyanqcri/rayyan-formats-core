@@ -138,6 +138,10 @@ describe Base do
         Base.plugins = [Plugins::Test, Plugins::TestCore]
       }
 
+      after {
+        Base.plugins = [] # to undo configuration
+      }
+
       it "returns the matching plugin if it is not a core plugin" do
         expect(Base.send(:match_plugin, 'test extension')).to eq(Plugins::Test)
       end
@@ -202,7 +206,93 @@ describe Base do
   end
 
   describe ".detect_import_format_recursive" do
-    it "is pending, testing recursive functions, meh?"
+    before {
+      stub_const("RayyanFormats::Base::MAX_SKIP_LINES", 2)
+      Base.plugins = [Plugins::Test, Plugins::TestCore]
+    }
+
+    after {
+      Base.plugins = [] # to undo configuration
+    }
+
+    shared_examples 'a valid format detector' do
+      it 'detects the format and returns the matching plugin and good lines' do
+        expect(Base.send(:detect_import_format_recursive, lines, 0)).to \
+          eq([plugin, good_lines])
+      end
+    end
+
+    shared_examples 'an invalid format detector' do
+      it 'detects the format and returns the matching plugin and good lines' do
+        expect{Base.send(:detect_import_format_recursive, lines, 0)}.to \
+          raise_error RuntimeError
+      end
+    end
+
+    context "input is valid TestCore" do
+      let(:good_lines) { %w(good1 good2) }
+      let(:lines) { bad_lines + good_lines }
+
+      before {
+        allow(Plugins::TestCore).to receive(:detect).with(/^bad/, lines) { false }
+        allow(Plugins::TestCore).to receive(:detect).with(/^good/, lines) { true }
+        allow(Plugins::CSV).to receive(:detect) { false }
+      }
+
+      context "at first line" do
+        let(:bad_lines) { [] }
+        let(:plugin) { Plugins::TestCore }
+
+        it_behaves_like 'a valid format detector'
+      end
+
+      context "after first line but before MAX_SKIP_LINES" do
+        let(:bad_lines) { %w(bad1 bad2) }
+        let(:plugin) { Plugins::TestCore }
+
+        it_behaves_like 'a valid format detector'
+      end
+
+      context "after first line but after MAX_SKIP_LINES" do
+        let(:bad_lines) { %w(bad1 bad2 bad3) }
+
+        it_behaves_like 'an invalid format detector'
+      end
+    end
+
+    context "input is CSV" do
+      let(:header_line) { "1" }
+      let(:body_lines) { %w(2 3 4) }
+      let(:lines) { [header_line] + body_lines }
+      let(:good_lines) { lines }
+      let(:plugin) { Plugins::CSV }
+
+      before {
+        allow(Plugins::TestCore).to receive(:detect){ false }
+        allow(Plugins::CSV).to receive(:detect).with(header_line, lines) { true }
+      }
+
+      it_behaves_like 'a valid format detector'
+    end
+
+    context "input is invalid" do
+      before {
+        allow(Plugins::TestCore).to receive(:detect){ false }
+        allow(Plugins::CSV).to receive(:detect) { false }
+      }
+
+      context "and shorter than MAX_SKIP_LINES" do
+        let(:lines) { %w(1) }
+
+        it_behaves_like 'an invalid format detector'
+      end
+
+      context "and longer than MAX_SKIP_LINES" do
+        let(:lines) { %w(1 2 3) }
+
+        it_behaves_like 'an invalid format detector'
+      end
+    end
   end
 
   describe ".try_join_arr" do

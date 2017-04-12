@@ -100,13 +100,13 @@ module RayyanFormats
         first_line = lines[skipped].lstrip
         csv_plugin = RayyanFormats::Plugins::CSV
         plugin = plugins.find{|plugin|
-          plugin != csv_plugin && plugin.is_core? && plugin.detect(first_line, lines)
+          plugin != csv_plugin && plugin.is_core? && plugin.send(:detect, first_line, lines)
         }
         if plugin
           return plugin, lines[skipped..-1]
         elsif skipped < MAX_SKIP_LINES && skipped + 1 < lines.length
           return detect_import_format_recursive(lines, skipped + 1)
-        elsif csv_plugin.detect(lines.first, lines) # nothing detected, csv last resort
+        elsif csv_plugin.send(:detect, lines.first, lines) # nothing detected, csv last resort
           return csv_plugin, lines
         else
           raise "Unsupported file contents, please use a proper way to export your files into one of these formats: #{extensions_str}"
