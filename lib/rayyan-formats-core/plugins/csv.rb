@@ -11,17 +11,21 @@ module RayyanFormats
       MAX_CSV_ROWS_DETECT = 5
 
       detect do |first_line, lines|
-        # if first few lines have same number of columns
-        # and first line has "title" header
-        col_regex = /\s*,\s*/
-        header = first_line.split(col_regex).map(&:downcase)
-        next false if !header.include?('title')
-        cols = header.length
-        1.upto([MAX_CSV_ROWS_DETECT, lines.length - 1].min) { |l|
-          next false if lines[l].split(col_regex, -1).length < cols # -1: don't suppress empty fields
-          # extra escaped commas could appear in non-header lines
-        }
-        next true
+        begin
+          # if first few lines have same number of columns
+          # and first line has "title" header
+          col_regex = /\s*,\s*/
+          header = first_line.split(col_regex).map(&:downcase)
+          raise 'no title' if !header.include?('title')
+          cols = header.length
+          1.upto([MAX_CSV_ROWS_DETECT, lines.length - 1].min) { |l|
+            raise 'mismatch' if lines[l].split(col_regex, -1).length < cols # -1: don't suppress empty fields
+            # extra escaped commas could appear in non-header lines
+          }
+          next true
+        rescue
+          next false
+        end
       end
 
       do_import do |body, filename, &block|
