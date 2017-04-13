@@ -93,6 +93,13 @@ module RayyanFormats
         !!@plugin_detect_block
       end
 
+      def match_plugin(ext)
+        plugin = plugins.find{|plugin| plugin.extension == ext.downcase}
+        return nil if plugin.nil?
+        # force core extensions to txt to pass by encoding and plugin detection filters
+        return plugin.is_core? ? RayyanFormats::Plugins::PlainText : plugin
+      end
+
       private
 
       def detect_import_format_recursive(lines, skipped)
@@ -111,13 +118,6 @@ module RayyanFormats
         else
           raise "Unsupported file contents, please use a proper way to export your files into one of these formats: #{extensions_str}"
         end
-      end
-
-      def match_plugin(ext)
-        plugin = plugins.find{|plugin| plugin.extension == ext.downcase}
-        return nil if plugin.nil?
-        # force core extensions to txt to pass by encoding and plugin detection filters
-        return plugin.is_core? ? RayyanFormats::Plugins::PlainText : plugin
       end
 
     end # class methods

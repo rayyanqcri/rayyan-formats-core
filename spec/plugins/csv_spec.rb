@@ -53,7 +53,7 @@ describe RayyanFormats::Plugins::CSV do
 
   describe ".do_import" do
     let(:filename) { 'spec/support/example1.csv' }
-    let(:body) { File.open(filename) }
+    let(:body) { File.read(filename) }
     let(:expected_total) { 2 }
 
     it "yields as many times as total articles found" do
