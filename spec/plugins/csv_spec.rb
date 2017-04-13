@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rayyan-formats-core-shared-examples'
 
 describe RayyanFormats::Plugins::CSV do
   describe ".detect" do
@@ -55,19 +56,13 @@ describe RayyanFormats::Plugins::CSV do
     let(:filename) { 'spec/support/example1.csv' }
     let(:body) { File.read(filename) }
     let(:expected_total) { 2 }
+    let(:plugin) { RayyanFormats::Plugins::CSV }
 
-    it "yields as many times as total articles found" do
-      yielded = 0
-      RayyanFormats::Plugins::CSV.send(:do_import, body, filename) do |target, total|
-        expect(total).to eq(expected_total)
-        yielded += 1
-      end
-      expect(yielded).to eq(expected_total)
-    end
+    it_behaves_like "repetitive target yielder"
 
     it "assigns correct values from first line" do
       first_line = true
-      RayyanFormats::Plugins::CSV.send(:do_import, body, filename) do |target|
+      plugin.send(:do_import, body, filename) do |target|
         if first_line
           expect(target.sid).to eq("key1")
           expect(target.title).to eq("title1")
