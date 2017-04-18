@@ -29,6 +29,8 @@ By default, the plugin will only process files no bigger than 10 megabytes. To o
     # support files up to 100 megabytes of size
     RayyanFormats::Base.max_file_size = 104_857_600
 
+### Importing
+
 To do the actual importing of reference files:
 
     source = RayyanFormats::Source.new("example.csv")
@@ -37,11 +39,39 @@ To do the actual importing of reference files:
       puts "Found target: #{target}. Total: #{total}. is_new: #{is_new}"
     }
 
-Note that `RayyanFormats::Source` is a proxy class. You can supply any class instance that responds to the following:
+### Exporting
+
+To do the actual exporting of reference files, assuming articles are stored
+in an array of targets:
+
+    plugin = RayyanFormats::Base.get_export_plugin('csv')
+    targets.each do |target|
+        puts plugin.export(target)
+    end
+
+### Data Types
+
+#### RayyanFormats::Source
+
+In the previous 2 examples, note that `RayyanFormats::Source` is a proxy class. You can supply any class instance that responds to the following:
 `:name` and `:attachment`. `:name` should return the file name string ending with a proper supported extension.
 `:attachment` should return any Ruby IO object that responds to `:size` (returning file size in bytes),
 `:read` (returning the entire file contents in UTF-8 encoding) and `:close` (closes the file). An example attachment
 instance is `File.open(name)`.
+
+#### RayyanFormats::Target
+
+Note also that `RayyanFormats::Target` is a forgiving object
+that accepts any setter method, stores it and returns it when accessed again
+with the corresponding getter method. For example:
+
+    t = RayyanFormats::Target.new
+    t.a = 1
+    puts t.a # 1
+    t.b = "hello"
+    puts t.b # "hello"
+    t.c = [1, 2, 3]
+    puts t.c.inspect # [1, 2, 3]
 
 ## Testing
 
