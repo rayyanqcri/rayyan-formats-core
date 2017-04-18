@@ -22,15 +22,15 @@ puts RayyanFormats::Base.plugins
 
 puts RayyanFormats::Plugins::PlainText.extension
 puts RayyanFormats::Plugins::PlainText.title
-puts RayyanFormats::Base.send(:match_plugin, 'txt')
-puts RayyanFormats::Base.send(:match_plugin, 'csv')
-begin
-  puts RayyanFormats::Base.send(:match_plugin, 'ris')
-  puts RayyanFormats::Base.send(:match_plugin, 'foo')
-rescue => e
-  puts "Exception: #{e.message}"
-end
-puts RayyanFormats::Base.extensions_str
+puts "match_import_plugin"
+puts RayyanFormats::Base.send(:match_import_plugin, 'txt')
+puts RayyanFormats::Base.send(:match_import_plugin, 'csv')
+puts RayyanFormats::Base.send(:match_import_plugin, 'ris')
+puts RayyanFormats::Base.import_extensions_str
+puts "match_export_plugin"
+puts RayyanFormats::Base.send(:match_export_plugin, 'csv')
+puts RayyanFormats::Base.send(:match_export_plugin, 'ris')
+puts RayyanFormats::Base.export_extensions_str
 
 t1 = RayyanFormats::Target.new
 t1.a = 1
@@ -44,3 +44,11 @@ RayyanFormats::Base.import(s1) { |target, total, is_new|
   # post processing for target
   puts "Found target: #{target}. Total: #{total}. is_new: #{is_new}"
 }
+
+puts "Exporting..."
+plugin = RayyanFormats::Base.get_export_plugin('csv')
+(["spec/support/example1.csv"] * 3).each do |filename|
+  RayyanFormats::Base.import(RayyanFormats::Source.new(filename)) { |target, total, is_new|
+    puts plugin.export(target)
+  }
+end

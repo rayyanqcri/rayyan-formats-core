@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["github@hammady.net"]
   spec.description   = %q{Rayyan core plugin for import/export of reference file formats. It comes with wrapped text and CSV plugins. Similarly more formats can be supported and enabled via the initializer. }
   spec.summary       = %q{Rayyan core plugin for import/export of reference file formats}
-  spec.homepage      = "https://github.com/rayyan/rayyan-formats-core"
+  spec.homepage      = "https://github.com/rayyanqcri/rayyan-formats-core"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

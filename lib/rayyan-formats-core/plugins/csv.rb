@@ -54,6 +54,52 @@ module RayyanFormats
         end
       end
 
+      do_export do |target, options|
+        header = options[:include_header] ? emit_header : ''
+        body = target.nil? ? '' : [
+          target.sid,
+          target.title,
+          target.authors.join(' and '),
+          target.journal_title,
+          target.journal_issn,
+          target.jvolume,
+          target.jissue,
+          target.pagination,
+          target.date_array ? target.date_array.first : nil,
+          target.publisher_name,
+          target.publisher_location,
+          target.url,
+          target.language,
+          options[:include_abstracts] ? target.abstracts.join("\n").strip : nil,
+          target.notes
+        ].to_csv
+        header + body
+      end
+
+      class << self
+        private
+
+        def emit_header
+          [
+            "key",
+            "title",
+            "authors",
+            "journal",
+            "issn",
+            "volume",
+            "issue",
+            "pages",
+            "year",
+            "publisher",
+            "location",
+            "url",
+            "language",
+            "abstract",
+            "notes"
+          ].to_csv
+        end
+      end
+
     end # class
   end # module
 end # module

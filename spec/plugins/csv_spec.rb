@@ -85,4 +85,66 @@ describe RayyanFormats::Plugins::CSV do
       end
     end
   end
+
+  describe ".do_export" do
+    let(:plugin) { RayyanFormats::Plugins::CSV }
+    let(:target) {
+      t = Target.new
+      t.sid = 'key1'
+      t.title = 'title1'
+      t.date_array = [2017]
+      t.jvolume = 1
+      t.jissue = 10
+      t.pagination = 'pages1'
+      t.url = 'url1'
+      t.language = 'lang1'
+      t.abstracts = ['abstract1', 'abstract2']
+      t.publisher_name = 'publisher1'
+      t.publisher_location = 'location1'
+      t.journal_title = 'journal1'
+      t.journal_issn = 'issn1'
+      t.notes = 'notes1'
+      t.authors = ['al1, af1', 'al2, af2']
+      t
+    }
+    let(:target_s_abstracts) {
+      "key1,title1,\"al1, af1 and al2, af2\",journal1,issn1,1,10,pages1,2017,publisher1,location1,url1,lang1,\"abstract1\nabstract2\",notes1\n"
+    }
+    let(:target_s) {
+      "key1,title1,\"al1, af1 and al2, af2\",journal1,issn1,1,10,pages1,2017,publisher1,location1,url1,lang1,,notes1\n"
+    }
+    let(:header) {
+      "key,title,authors,journal,issn,volume,issue,pages,year,publisher,location,url,language,abstract,notes\n"
+    }
+
+    it "emits header if specified" do
+      output = plugin.send(:do_export, nil, {include_header: true})
+      expect(output).to eq(header)
+    end
+
+    it "does not emit header of not specified" do
+      output = plugin.send(:do_export, nil, {include_header: false})
+      expect(output).not_to eq(header)
+    end
+
+    it "emits target if not nil (without abstracts)" do
+      output = plugin.send(:do_export, target, {include_abstracts: false})
+      expect(output).to eq(target_s)
+    end
+
+    it "emits target if not nil (with abstracts)" do
+      output = plugin.send(:do_export, target, {include_abstracts: true})
+      expect(output).to eq(target_s_abstracts)
+    end
+
+    it "does not emit target if nil" do
+      output = plugin.send(:do_export, nil, {})
+      expect(output).not_to eq(target_s)
+    end
+
+    it "emits header and target if both specified" do
+      output = plugin.send(:do_export, target, {include_header: true})
+      expect(output).to eq(header + target_s)
+    end
+  end
 end

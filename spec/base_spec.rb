@@ -21,6 +21,17 @@ module RayyanFormats
       do_import do |body, filename, &block|
         next body
       end
+      do_export do |body, filename, &block|
+        next body * 3
+      end
+    end
+
+    class TestExport < RayyanFormats::Base
+      title 'test export title'
+      extension 'test export extension'
+      do_export do |body, filename, &block|
+        next body * 3
+      end
     end
   end
 end
@@ -34,6 +45,7 @@ include RayyanFormats
 describe Base do
   let(:test_plugin) { Plugins::Test }
   let(:test_core_plugin) { Plugins::TestCore }
+  let(:export_only_plugin) { Plugins::TestExport }
 
   describe "DSL" do
     let(:first_line) { "first_line" }
@@ -52,6 +64,10 @@ describe Base do
     it "identifies do_import block" do
       expect(test_plugin.send(:do_import, body)).to eq(body * 2)
     end
+
+    it "identifies do_export block" do
+      expect(test_core_plugin.send(:do_export, body)).to eq(body * 3)
+    end
   end
 
   describe ".is_core?" do
@@ -61,6 +77,28 @@ describe Base do
 
     it "returns true for core plugins (having detect block)" do
       expect(test_core_plugin.send(:is_core?)).to eq(true)
+    end
+  end
+
+  describe ".can_import?" do
+    it "returns false for plugins without do_import block" do
+      expect(export_only_plugin.send(:can_import?)).to eq(false)
+    end
+
+    it "returns true for plugins with do_import block" do
+      expect(test_core_plugin.send(:can_import?)).to eq(true)
+      expect(test_plugin.send(:can_import?)).to eq(true)
+    end
+  end
+
+  describe ".can_export?" do
+    it "returns false for plugins without do_export block" do
+      expect(test_plugin.send(:can_export?)).to eq(false)
+    end
+
+    it "returns true for plugins with do_export block" do
+      expect(test_core_plugin.send(:can_export?)).to eq(true)
+      expect(export_only_plugin.send(:can_export?)).to eq(true)
     end
   end
 
@@ -116,21 +154,33 @@ describe Base do
     end
   end
 
-  describe ".extensions_str" do
-    it "returns default extensions without configuration" do
-      expect(Base.extensions_str).to eq("txt, csv")
+  describe ".import_extensions_str" do
+    it "returns default import extensions without configuration" do
+      expect(Base.import_extensions_str).to eq("txt, csv")
     end
 
-    it "returns extensions for configured plugins plus default plugins" do
+    it "returns extensions for configured plugins plus default import plugins" do
       Base.plugins = [Plugins::Test]
-      expect(Base.extensions_str).to eq("test extension, txt, csv")
+      expect(Base.import_extensions_str).to eq("test extension, txt, csv")
       Base.plugins = [] # to undo configuration
     end
   end
 
-  describe ".match_plugin" do
+  describe ".export_extensions_str" do
+    it "returns default export extensions without configuration" do
+      expect(Base.export_extensions_str).to eq("csv")
+    end
+
+    it "returns extensions for configured plugins plus default export plugins" do
+      Base.plugins = [Plugins::TestCore]
+      expect(Base.export_extensions_str).to eq("test core extension, csv")
+      Base.plugins = [] # to undo configuration
+    end
+  end
+
+  describe ".match_import_plugin" do
     it "returns nil if extension is not supported" do
-      expect(Base.send(:match_plugin, 'unsupported')).to eq(nil)
+      expect(Base.send(:match_import_plugin, 'unsupported')).to eq(nil)
     end
 
     context "when there is a matching plugin" do
@@ -143,11 +193,55 @@ describe Base do
       }
 
       it "returns the matching plugin if it is not a core plugin" do
-        expect(Base.send(:match_plugin, 'test extension')).to eq(Plugins::Test)
+        expect(Base.send(:match_import_plugin, 'test extension')).to eq(Plugins::Test)
       end
 
       it "returns the plain text plugin if the matching plugin is core" do
-        expect(Base.send(:match_plugin, 'test core extension')).to eq(Plugins::PlainText)
+        expect(Base.send(:match_import_plugin, 'test core extension')).to eq(Plugins::PlainText)
+      end
+    end
+  end
+
+  describe ".match_export_plugin" do
+    it "returns nil if extension is not supported" do
+      expect(Base.send(:match_export_plugin, 'unsupported')).to eq(nil)
+    end
+
+    context "when there is a matching plugin" do
+      before {
+        Base.plugins = [Plugins::TestExport]
+      }
+
+      after {
+        Base.plugins = [] # to undo configuration
+      }
+
+      it "returns the matching plugin" do
+        expect(Base.send(:match_export_plugin, 'test export extension')).to eq(Plugins::TestExport)
+      end
+    end
+  end
+
+  describe ".match_plugin" do
+    it "returns nil if extension is not supported" do
+      expect(Base.send(:match_plugin, 'unsupported')).to eq(nil)
+    end
+
+    it "returns nil if passed block returns false" do
+      expect(Base.send(:match_plugin, 'test extension') {return false}).to eq(nil)
+    end
+
+    context "when there is a matching plugin where passed block returns true" do
+      before {
+        Base.plugins = [Plugins::Test, Plugins::TestCore, Plugins::TestExport]
+      }
+
+      after {
+        Base.plugins = [] # to undo configuration
+      }
+
+      it "returns the matching plugin" do
+        expect(Base.send(:match_plugin, 'test extension') {|plugin| plugin == Plugins::Test }).to eq(Plugins::Test)
       end
     end
   end
@@ -161,28 +255,28 @@ describe Base do
 
     context "if no plugin is matching by extension" do
       before {
-        allow(Base).to receive(:match_plugin).with("ext") { nil }
+        allow(Base).to receive(:match_import_plugin).with("ext") { nil }
       }
 
       it "raises an exception" do
-        expect{Base.import(source)}.to raise_error RuntimeError
+        expect{Base.import(source)}.to raise_error RuntimeError, /Unsupported file format/
       end
     end
 
     context "if file size is too big" do
       before {
-        allow(Base).to receive(:match_plugin).with("ext") { plugin }
+        allow(Base).to receive(:match_import_plugin).with("ext") { plugin }
         allow(Base).to receive(:max_file_size) { 10 } # too small
       }
 
       it "raises an exception" do
-        expect{Base.import(source)}.to raise_error RuntimeError
+        expect{Base.import(source)}.to raise_error RuntimeError, /The file is too big to process/
       end
     end
 
     context "if there is a matching plugin" do
       before {
-        allow(Base).to receive(:match_plugin).with("ext") { plugin }
+        allow(Base).to receive(:match_import_plugin).with("ext") { plugin }
         allow(Base).to receive(:max_file_size) { 999 } # big enough
       }
 
@@ -193,9 +287,95 @@ describe Base do
     end
   end
 
+  let(:plugin) { Plugins::TestExport }
+  let(:plugin_instance) { plugin.new }
+  let(:fake_rand) { 0.12345678 }
+  let(:base_id) { 'id12345678_' }
+  let(:export_times) { 3 }
+
+  describe ".get_export_plugin" do
+    let(:ext) { 'ext' }
+    let(:plugin_instance) { double }
+
+    context "if no plugin is matching by extension" do
+      before {
+        allow(Base).to receive(:match_export_plugin).with(ext) { nil }
+      }
+
+      it "raises an exception" do
+        expect{Base.get_export_plugin(ext)}.to raise_error RuntimeError, /Unsupported file format/
+      end
+    end
+
+    context "if there is a matching plugin" do
+      before {
+        allow(Base).to receive(:match_export_plugin).with(ext) { plugin }
+        allow(plugin).to receive(:new) { plugin_instance }
+      }
+
+      it "returns a new plugin instance" do
+        expect(Base.get_export_plugin(ext)).to eq(plugin_instance)
+      end
+    end
+  end
+
+  describe ".export" do
+    let(:target) { double }
+    let(:options) { {} }
+    let(:unique_ids) { %w(id1 id2 id3) }
+
+    it "delegates to protected do_export with same arguments" do
+      expect(plugin).to receive(:do_export).with(target, anything)
+      plugin_instance.export(target)
+    end
+
+    it "calls do_export with include_header: true for the first time only" do
+      expect_options = proc {|include_header|
+        expect(plugin).to receive(:do_export).once.ordered {|arg1, arg2|
+          expect(arg2).to include({include_header: include_header})
+        }
+      }
+      export_times.times{|i| expect_options.call(i == 0) }
+      export_times.times{ plugin_instance.export(target) }
+    end
+
+    it "calls do_export with a new unique_id each time" do
+      expect_options = proc {|unique_id|
+        expect(plugin).to receive(:do_export).once.ordered {|arg1, arg2|
+          expect(arg2).to include({unique_id: unique_id})
+        }
+      }
+      plugin_instance.instance_variable_set('@base_id', 'id')
+      export_times.times{|i| expect_options.call(unique_ids[i]) }
+      export_times.times{ plugin_instance.export(target) }
+    end
+  end
+
+  describe ".initialize" do
+    before {
+      allow_any_instance_of(plugin).to receive(:rand) { fake_rand }
+    }
+
+    it "initializes @base_id with a random 8 digit number prefixed by 'id'" do
+      expect(plugin_instance.base_id).to eq(base_id)
+    end
+  end
+
+  describe "#get_unique_id" do
+    before {
+      allow_any_instance_of(plugin).to receive(:rand) { fake_rand }
+    }
+
+    let(:unique_ids) { 1.upto(export_times).map{|i| "#{base_id}#{i}"} }
+
+    it "returns a new unique_id each time" do
+      export_times.times{|i| expect(plugin_instance.get_unique_id).to eq(unique_ids[i])} 
+    end
+  end
+
   describe ".detect_import_format" do
     it "raises an exception if input file is empty" do
-      expect{Base.send(:detect_import_format, "")}.to raise_error RuntimeError
+      expect{Base.send(:detect_import_format, "")}.to raise_error RuntimeError, /Empty file/
     end
 
     it "delegates to .detect_import_format_recursive" do
@@ -223,9 +403,9 @@ describe Base do
     end
 
     shared_examples 'an invalid format detector' do
-      it 'detects the format and returns the matching plugin and good lines' do
+      it 'raises an error due to invalid format' do
         expect{Base.send(:detect_import_format_recursive, lines, 0)}.to \
-          raise_error RuntimeError
+          raise_error RuntimeError, /Unsupported file contents/
       end
     end
 
