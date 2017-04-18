@@ -64,22 +64,22 @@ describe RayyanFormats::Plugins::CSV do
       first_line = true
       plugin.send(:do_import, body, filename) do |target|
         if first_line
+          expect(target.publication_types).to eq(["Journal Article"])
           expect(target.sid).to eq("key1")
           expect(target.title).to eq("title1")
           expect(target.date_array).to eq([2017])
+          expect(target.journal_title).to eq("journal1")
+          expect(target.journal_issn).to eq("issn1")
           expect(target.jvolume).to eq(1)
           expect(target.jissue).to eq(10)
           expect(target.pagination).to eq("pages1")
           expect(target.authors).to eq(["a1l, a1f", "a2l, a2f", "a3l, a3f"])
           expect(target.url).to eq("url1")
           expect(target.language).to eq("lang1")
-          expect(target.notes).to eq("notes1")
-          expect(target.abstracts).to eq(["abstract1"])
-          expect(target.publication_types).to eq(["Journal Article"])
           expect(target.publisher_name).to eq("publisher1")
           expect(target.publisher_location).to eq("location1")
-          expect(target.journal_title).to eq("journal1")
-          expect(target.journal_issn).to eq("issn1")
+          expect(target.abstracts).to eq(["abstract1"])
+          expect(target.notes).to eq("notes1")
         end
         first_line = false
       end
@@ -93,28 +93,28 @@ describe RayyanFormats::Plugins::CSV do
       t.sid = 'key1'
       t.title = 'title1'
       t.date_array = [2017]
+      t.journal_title = 'journal1'
+      t.journal_issn = 'issn1'
       t.jvolume = 1
       t.jissue = 10
       t.pagination = 'pages1'
+      t.authors = ['al1, af1', 'al2, af2']
       t.url = 'url1'
       t.language = 'lang1'
-      t.abstracts = ['abstract1', 'abstract2']
       t.publisher_name = 'publisher1'
       t.publisher_location = 'location1'
-      t.journal_title = 'journal1'
-      t.journal_issn = 'issn1'
+      t.abstracts = ['abstract1', 'abstract2']
       t.notes = 'notes1'
-      t.authors = ['al1, af1', 'al2, af2']
       t
     }
     let(:target_s_abstracts) {
-      "key1,title1,\"al1, af1 and al2, af2\",journal1,issn1,1,10,pages1,2017,publisher1,location1,url1,lang1,\"abstract1\nabstract2\",notes1\n"
+      "key1,title1,2017,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,\"abstract1\nabstract2\",notes1\n"
     }
     let(:target_s) {
-      "key1,title1,\"al1, af1 and al2, af2\",journal1,issn1,1,10,pages1,2017,publisher1,location1,url1,lang1,,notes1\n"
+      "key1,title1,2017,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,,notes1\n"
     }
     let(:header) {
-      "key,title,authors,journal,issn,volume,issue,pages,year,publisher,location,url,language,abstract,notes\n"
+      "key,title,year,journal,issn,volume,issue,pages,authors,url,language,publisher,location,abstract,notes\n"
     }
 
     it "emits header if specified" do

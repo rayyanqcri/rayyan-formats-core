@@ -33,22 +33,22 @@ module RayyanFormats
         total = articles.length
         articles.each do |article|
           target = Target.new
+          target.publication_types = ["Journal Article"]
           target.sid = article[:key].to_s
           target.title = article[:title].to_s
           target.date_array = [article[:year]]
+          target.journal_title = article[:journal]
+          target.journal_issn = article[:issn].to_s
           target.jvolume = article[:volume].to_i rescue 0
           target.jissue = (article[:issue] || article[:number]).to_i rescue 0
           target.pagination = article[:pages].to_s
           target.authors = article[:authors].split(/\s*;\s*|\s*and\s*/) if article[:authors]
           target.url = article[:url].to_s
           target.language = article[:language]
-          target.notes = try_join_arr(article[:notes])
-          target.abstracts = [article[:abstract]].compact
-          target.publication_types = ["Journal Article"]
           target.publisher_name = article[:publisher]
           target.publisher_location = article[:location].to_s
-          target.journal_title = article[:journal]
-          target.journal_issn = article[:issn].to_s
+          target.abstracts = [article[:abstract]].compact
+          target.notes = try_join_arr(article[:notes])
 
           block.call(target, total)
         end
@@ -59,17 +59,17 @@ module RayyanFormats
         body = target.nil? ? '' : [
           target.sid,
           target.title,
-          target.authors.join(' and '),
+          target.date_array ? target.date_array.first : nil,
           target.journal_title,
           target.journal_issn,
           target.jvolume && target.jvolume > 0 ? target.jvolume : nil,
           target.jissue && target.jissue > 0 ? target.jissue : nil,
           target.pagination,
-          target.date_array ? target.date_array.first : nil,
-          target.publisher_name,
-          target.publisher_location,
+          target.authors.join(' and '),
           target.url,
           target.language,
+          target.publisher_name,
+          target.publisher_location,
           options[:include_abstracts] ? target.abstracts.join("\n").strip : nil,
           target.notes
         ].to_csv
@@ -83,17 +83,17 @@ module RayyanFormats
           [
             "key",
             "title",
-            "authors",
+            "year",
             "journal",
             "issn",
             "volume",
             "issue",
             "pages",
-            "year",
-            "publisher",
-            "location",
+            "authors",
             "url",
             "language",
+            "publisher",
+            "location",
             "abstract",
             "notes"
           ].to_csv
