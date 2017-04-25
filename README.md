@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/rayyanqcri/rayyan-formats-core.svg?branch=master)](https://travis-ci.org/rayyanqcri/rayyan-formats-core)
+[![Coverage Status](https://coveralls.io/repos/github/rayyanqcri/rayyan-formats-core/badge.svg?branch=master)](https://coveralls.io/github/rayyanqcri/rayyan-formats-core?branch=master)
 
 # RayyanFormats
 
