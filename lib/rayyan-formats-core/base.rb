@@ -19,7 +19,7 @@ module RayyanFormats
         @@export_extensions_str = @@plugins.map{|plugin|
           plugin.extension if plugin.can_export?
         }.compact.join(", ")
-        @@logger = DummyLogger.new
+        @@logger ||= DummyLogger.new
         @@plugins
       end
 
