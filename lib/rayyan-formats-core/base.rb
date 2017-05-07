@@ -1,4 +1,5 @@
 require 'tempfile'
+require_relative '../support/dummy_logger'
 
 module RayyanFormats
   class Base
@@ -18,7 +19,7 @@ module RayyanFormats
         @@export_extensions_str = @@plugins.map{|plugin|
           plugin.extension if plugin.can_export?
         }.compact.join(", ")
-        @@logger = nil
+        @@logger = DummyLogger.new
         @@plugins
       end
 
@@ -43,8 +44,8 @@ module RayyanFormats
       def plugins; @@plugins end
       def max_file_size=(value); @@max_file_size = value end
       def max_file_size; @@max_file_size end
-      def logger=(value); @@logger = value end
-      def logger(message); @@logger.debug(message) if @@logger end
+      def logger=(value); @@logger = value || DummyLogger.new end
+      def logger; @@logger end
       def import_extensions_str; @@import_extensions_str end
       def export_extensions_str; @@export_extensions_str end
 
@@ -76,7 +77,7 @@ module RayyanFormats
         if arguments.length == 0
           @plugin_import_block = block
         else
-          logger "Inside #{self.title} parser for file: #{arguments[1] rescue ''}"
+          logger.debug "Inside #{self.title} parser for file: #{arguments[1] rescue ''}"
           @plugin_import_block.call(*arguments, &block)
         end
       end
@@ -93,7 +94,7 @@ module RayyanFormats
         if arguments.length == 0
           @plugin_detect_block = block
         else
-          logger "Detecting #{self.title}"
+          logger.debug "Detecting #{self.title}"
           @plugin_detect_block.call(*arguments, &block)
         end
       end

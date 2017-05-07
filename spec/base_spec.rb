@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'log4r'
+require 'logger'
 
 module RayyanFormats
   module Plugins
@@ -38,14 +38,16 @@ end
 
 include RayyanFormats
 
-# logger = Log4r::Logger.new('RayyanFormats')
-# logger.outputters = Log4r::Outputter.stdout
-# RayyanFormats::Base.logger = logger
-
 describe Base do
   let(:test_plugin) { Plugins::Test }
   let(:test_core_plugin) { Plugins::TestCore }
   let(:export_only_plugin) { Plugins::TestExport }
+
+  before {
+    logger = Logger.new(STDOUT)
+    logger.level = Logger::FATAL
+    RayyanFormats::Base.logger = logger
+  }
 
   describe "DSL" do
     let(:first_line) { "first_line" }
@@ -143,14 +145,20 @@ describe Base do
     let(:logger) { double }
 
     it "does nothing when asked to log messages and no logger configured" do
-      expect(logger).not_to receive(:debug)
-      Base.logger(message)
+      # logger is a strict double, if test passes, then it received no unexpected messages
+      Base.logger.debug(message)
     end
 
-    it "logs messages if a logger is configured" do
+    it "does nothing when asked to log messages and a nil logger is configured" do
+      # logger is a strict double, if test passes, then it received no unexpected messages
+      Base.logger = nil
+      Base.logger.debug(message)
+    end
+
+    it "logs messages if a proper logger is configured" do
       Base.logger = logger
       expect(logger).to receive(:debug).with(message)
-      Base.logger(message)
+      Base.logger.debug(message)
     end
   end
 

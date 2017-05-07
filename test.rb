@@ -4,10 +4,10 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'rayyan-formats-core'
-require 'log4r'
+require 'logger'
 
-logger = Log4r::Logger.new('RayyanFormats')
-logger.outputters = Log4r::Outputter.stdout
+logger = Logger.new(STDOUT)
+logger.level = Logger::DEBUG
 RayyanFormats::Base.logger = logger
 
 # printing default config
