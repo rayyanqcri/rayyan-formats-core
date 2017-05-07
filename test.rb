@@ -40,15 +40,15 @@ puts "t1.b = #{t1.b}"
 puts "t1.c = #{t1.c}"
 
 s1 = RayyanFormats::Source.new("../rayyan/nonrails/citation_examples/example.csv")
-RayyanFormats::Base.import(s1) { |target, total, is_new|
+RayyanFormats::Base.import(s1) { |target, total|
   # post processing for target
-  puts "Found target: #{target}. Total: #{total}. is_new: #{is_new}"
+  puts "Found target: #{target}. Total: #{total}."
 }
 
 puts "Exporting..."
 plugin = RayyanFormats::Base.get_export_plugin('csv')
 (["spec/support/example1.csv"] * 3).each do |filename|
-  RayyanFormats::Base.import(RayyanFormats::Source.new(filename)) { |target, total, is_new|
+  RayyanFormats::Base.import(RayyanFormats::Source.new(filename)) { |target, total|
     puts plugin.export(target)
   }
 end

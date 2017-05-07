@@ -35,9 +35,9 @@ By default, the plugin will only process files no bigger than 10 megabytes. To o
 To do the actual importing of reference files:
 
     source = RayyanFormats::Source.new("example.csv")
-    RayyanFormats::Base.import(source) { |target, total, is_new|
+    RayyanFormats::Base.import(source) { |target, total|
       # post processing for target
-      puts "Found target: #{target}. Total: #{total}. is_new: #{is_new}"
+      puts "Found target: #{target}. Total: #{total}."
     }
 
 ### Exporting
