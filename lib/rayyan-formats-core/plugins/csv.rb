@@ -6,7 +6,23 @@ module RayyanFormats
 
       title 'CSV'
       extension 'csv'
-      description 'Supports header column names: key,title,authors,journal,issn,volume,issue,pages,year,publisher,location,url,language,abstract in any order'
+      description 'Supports header column names: ' + %w(
+        key
+        title
+        year
+        journal
+        issn
+        volume
+        issue
+        pages
+        authors
+        url
+        language
+        publisher
+        location
+        abstract
+        notes
+      ).join(', ') + ' in any order'
 
       MAX_CSV_ROWS_DETECT = 5
 

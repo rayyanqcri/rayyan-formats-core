@@ -22,6 +22,8 @@ puts RayyanFormats::Base.plugins
 
 puts RayyanFormats::Plugins::PlainText.extension
 puts RayyanFormats::Plugins::PlainText.title
+puts RayyanFormats::Plugins::CSV.title
+puts RayyanFormats::Plugins::CSV.description
 puts "match_import_plugin"
 puts RayyanFormats::Base.send(:match_import_plugin, 'txt')
 puts RayyanFormats::Base.send(:match_import_plugin, 'csv')
