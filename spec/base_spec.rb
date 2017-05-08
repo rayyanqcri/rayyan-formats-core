@@ -18,9 +18,7 @@ module RayyanFormats
       detect do |first_line, lines|
         next first_line
       end
-      do_import do |body, filename, &block|
-        next body
-      end
+      do_import do |body, filename, &block|; end
       do_export do |body, filename, &block|
         next body * 3
       end
@@ -29,9 +27,7 @@ module RayyanFormats
     class TestExport < RayyanFormats::Base
       title 'test export title'
       extension 'test export extension'
-      do_export do |body, filename, &block|
-        next body * 3
-      end
+      do_export do |body, filename, &block|; end
     end
   end
 end
