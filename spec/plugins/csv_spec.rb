@@ -13,7 +13,7 @@ describe RayyanFormats::Plugins::CSV do
       end
     end
 
-    context "when header contains title and number of columns matches header" do
+    context "when header contains title" do
       let(:is_csv?) { true }
 
       it_behaves_like 'a csv detector'
@@ -22,31 +22,6 @@ describe RayyanFormats::Plugins::CSV do
     context "when header does not contain title" do
       let(:header) { 'x ,no title,y' }
       let(:is_csv?) { false }
-
-      it_behaves_like 'a csv detector'
-    end
-
-    context "when number of columns in any of the first few body lines is less than those of header" do
-      let(:body_lines) { ['a1,a2,a3', 'b1,b2,b3', 'c1,c2', 'd1,d2,d3,d4'] }
-
-      before {
-        stub_const("RayyanFormats::Plugins::CSV::MAX_CSV_ROWS_DETECT", 10)
-      }
-
-      let(:is_csv?) { false }
-
-      it_behaves_like 'a csv detector'
-    end
-
-    context "when number of columns in any of the late body lines is less than those of header" do
-      let(:body_lines) { ['a1,a2,a3', 'b1,b2,b3', 'c1,c2'] }
-
-      before {
-        stub_const("RayyanFormats::Plugins::CSV::MAX_CSV_ROWS_DETECT", 2)
-      }
-
-      # gets deceived and returns true
-      let(:is_csv?) { true }
 
       it_behaves_like 'a csv detector'
     end
@@ -67,7 +42,7 @@ describe RayyanFormats::Plugins::CSV do
           expect(target.publication_types).to eq(["Journal Article"])
           expect(target.sid).to eq("key1")
           expect(target.title).to eq("title1")
-          expect(target.date_array).to eq([2017])
+          expect(target.date_array).to eq(["2017", "5", "4"])
           expect(target.journal_title).to eq("journal1")
           expect(target.journal_issn).to eq("issn1")
           expect(target.jvolume).to eq(1)
@@ -92,7 +67,7 @@ describe RayyanFormats::Plugins::CSV do
       t = RayyanFormats::Target.new
       t.sid = 'key1'
       t.title = 'title1'
-      t.date_array = [2017]
+      t.date_array = [2017, 5, 4]
       t.journal_title = 'journal1'
       t.journal_issn = 'issn1'
       t.jvolume = 1
@@ -108,13 +83,13 @@ describe RayyanFormats::Plugins::CSV do
       t
     }
     let(:target_s_abstracts) {
-      "key1,title1,2017,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,\"abstract1\nabstract2\",notes1\n"
+      "key1,title1,2017,5,4,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,\"abstract1\nabstract2\",notes1\n"
     }
     let(:target_s) {
-      "key1,title1,2017,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,,notes1\n"
+      "key1,title1,2017,5,4,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,,notes1\n"
     }
     let(:header) {
-      "key,title,year,journal,issn,volume,issue,pages,authors,url,language,publisher,location,abstract,notes\n"
+      "key,title,year,month,day,journal,issn,volume,issue,pages,authors,url,language,publisher,location,abstract,notes\n"
     }
 
     it "emits header if specified" do

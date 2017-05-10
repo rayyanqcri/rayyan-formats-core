@@ -10,6 +10,8 @@ module RayyanFormats
         key
         title
         year
+        month
+        day
         journal
         issn
         volume
@@ -28,16 +30,13 @@ module RayyanFormats
 
       detect do |first_line, lines|
         begin
-          # if first few lines have same number of columns
-          # and first line has "title" header
+          # check if first line has "title" header
           col_regex = /\s*,\s*/
           header = first_line.split(col_regex).map(&:downcase)
-          raise 'no title' if !header.include?('title')
-          cols = header.length
-          1.upto([MAX_CSV_ROWS_DETECT, lines.length - 1].min) { |l|
-            raise 'mismatch' if lines[l].split(col_regex, -1).length < cols # -1: don't suppress empty fields
-            # extra escaped commas could appear in non-header lines
-          }
+          if !header.include?('title')
+            logger.debug 'CSV header has no title field'
+            raise 'no title'
+          end
           next true
         rescue
           next false
@@ -45,24 +44,24 @@ module RayyanFormats
       end
 
       do_import do |body, filename, &block|
-        articles = ::CSV.parse(body, {:headers => true, :return_headers => false, :header_converters => :symbol, :converters => :all})
+        articles = ::CSV.parse(body, {:headers => true, :return_headers => false, :header_converters => :symbol})
         total = articles.length
         articles.each do |article|
           target = Target.new
           target.publication_types = ["Journal Article"]
-          target.sid = article[:key].to_s
-          target.title = article[:title].to_s
-          target.date_array = [article[:year]]
+          target.sid = article[:key]
+          target.title = article[:title]
+          target.date_array = [article[:year], article[:month] || 1, article[:day] || 1]
           target.journal_title = article[:journal]
-          target.journal_issn = article[:issn].to_s
+          target.journal_issn = article[:issn]
           target.jvolume = article[:volume].to_i rescue 0
           target.jissue = (article[:issue] || article[:number]).to_i rescue 0
-          target.pagination = article[:pages].to_s
+          target.pagination = article[:pages]
           target.authors = article[:authors].split(/\s*;\s*|\s*and\s*/) if article[:authors]
-          target.url = article[:url].to_s
+          target.url = article[:url]
           target.language = article[:language]
           target.publisher_name = article[:publisher]
-          target.publisher_location = article[:location].to_s
+          target.publisher_location = article[:location]
           target.abstracts = [article[:abstract]].compact
           target.notes = try_join_arr(article[:notes])
 
@@ -75,7 +74,9 @@ module RayyanFormats
         body = target.nil? ? '' : [
           target.sid,
           target.title,
-          target.date_array ? target.date_array.first : nil,
+          target.date_array ? target.date_array[0] : nil,
+          target.date_array ? target.date_array[1] : nil,
+          target.date_array ? target.date_array[2] : nil,
           target.journal_title,
           target.journal_issn,
           target.jvolume && target.jvolume > 0 ? target.jvolume : nil,
@@ -86,7 +87,7 @@ module RayyanFormats
           target.language,
           target.publisher_name,
           target.publisher_location,
-          options[:include_abstracts] ? target.abstracts.join("\n").strip : nil,
+          get_abstracts(target, options){|abstracts| abstracts.join("\n").strip},
           target.notes
         ].to_csv
         header + body
@@ -100,6 +101,8 @@ module RayyanFormats
             "key",
             "title",
             "year",
+            "month",
+            "day",
             "journal",
             "issn",
             "volume",
