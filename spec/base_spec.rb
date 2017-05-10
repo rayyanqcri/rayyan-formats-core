@@ -182,6 +182,18 @@ describe Base do
     end
   end
 
+  describe ".available_plugins" do
+    it "returns all available plugins in RayyanFormats::Plugins namespace" do
+      expect(Base.available_plugins).to match_array([
+        Plugins::CSV,
+        Plugins::PlainText,
+        Plugins::Test,
+        Plugins::TestCore,
+        Plugins::TestExport
+      ])
+    end
+  end
+
   describe ".match_import_plugin" do
     it "returns nil if extension is not supported" do
       expect(Base.send(:match_import_plugin, 'unsupported')).to eq(nil)
@@ -477,6 +489,74 @@ describe Base do
         it_behaves_like 'an invalid format detector'
       end
     end
+  end
+
+  describe ".get_abstracts" do
+    let(:string_abstracts) { %w(a b) }
+    let(:abstracts) { string_abstracts }
+    let(:target) {
+      t = RayyanFormats::Target.new
+      t.abstracts = abstracts
+      t
+    }
+
+    let(:options) {
+      {include_abstracts: true}
+    }
+
+    let(:block) {
+      proc {|abstracts| abstracts}
+    }
+
+    shared_examples "get_abstracts validator" do
+      it "retuns expected abstracts" do
+        expect(Base.send(:get_abstracts, target, options, &block)).to eq(expected)
+      end
+    end
+
+    context "when options does not have include_abstracts" do
+      let(:expected) { nil }
+      before { options[:include_abstracts] = nil }
+      it_behaves_like "get_abstracts validator"
+    end
+
+    context "when target has no abstracts array" do
+      let(:expected) { nil }
+      before { target.abstracts = nil }
+      it_behaves_like "get_abstracts validator"
+    end
+
+    context "when target has empty abstracts array" do
+      let(:expected) { nil }
+      before { target.abstracts = [] }
+      it_behaves_like "get_abstracts validator"
+    end
+
+    context "when target.abstracts is an array of strings" do
+      let(:expected) { string_abstracts }
+      it_behaves_like "get_abstracts validator"
+    end
+
+    context "when target.abstracts is an array of hashes without labels" do
+      let(:abstracts) { string_abstracts.map{|abstract| {content: abstract}} }
+      let(:expected) { string_abstracts }
+      it_behaves_like "get_abstracts validator"
+    end
+
+    context "when target.abstracts is an array of hashes with labels" do
+      let(:abstracts) {
+        string_abstracts.map.with_index{|abstract, index|
+          {label: "label#{index+1}", content: abstract}
+        }
+      }
+      let(:expected) {
+        string_abstracts.map.with_index{|abstract, index|
+          "label#{index+1}: #{abstract}"
+        }
+      }
+      it_behaves_like "get_abstracts validator"
+    end
+
   end
 
   describe ".try_join_arr" do

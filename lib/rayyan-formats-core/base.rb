@@ -49,6 +49,14 @@ module RayyanFormats
       def import_extensions_str; @@import_extensions_str end
       def export_extensions_str; @@export_extensions_str end
 
+      def available_plugins
+        # list all known plugins in runtime
+        # http://stackoverflow.com/a/3680719/441849
+        RayyanFormats::Plugins.constants
+        .map(&RayyanFormats::Plugins.method(:const_get))
+        .grep(Class)
+      end
+
       def import(source, &block)
         filename = source.name
         original_ext = File.extname(filename).delete('.')
@@ -100,6 +108,18 @@ module RayyanFormats
       end
 
       # helper methods for plugins
+      def get_abstracts(target, options, &block)
+        return nil unless options[:include_abstracts] && target.abstracts && target.abstracts.length > 0
+        block.call target.abstracts.map{|abstract|
+          if abstract.instance_of?(Hash)
+            label = abstract[:label] ? "#{abstract[:label]}: " : nil
+            "#{label}#{abstract[:content]}"
+          else
+            abstract
+          end
+        }
+      end
+
       def try_join_arr(val)
         val.join("\n") rescue val
       end
