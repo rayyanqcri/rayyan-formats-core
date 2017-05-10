@@ -3,7 +3,7 @@ module RayyanFormats
     attr_reader :name, :attachment
 
     def name=(value)
-      raise "Invalid name, must end with '.' then extension" unless value =~ /\..+/
+      raise "Invalid name: #{value}, must end with '.' then extension" unless value =~ /\..+/
       @name = value
     end
 

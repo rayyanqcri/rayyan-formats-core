@@ -53,7 +53,7 @@ module RayyanFormats
         filename = source.name
         original_ext = File.extname(filename).delete('.')
         plugin = match_import_plugin(original_ext)
-        raise "Unsupported file format: #{original_ext}, please use one of: #{import_extensions_str}" unless plugin
+        raise "Unsupported file format for import: #{original_ext}, please use one of: #{import_extensions_str}" unless plugin
 
         # check file size, otherwise the worker process will crash for huge files
         file = source.attachment
@@ -66,7 +66,7 @@ module RayyanFormats
 
       def get_export_plugin(ext)
         plugin = match_export_plugin(ext)
-        raise "Unsupported file format: #{ext}, please use one of: #{export_extensions_str}" unless plugin
+        raise "Unsupported file format for export: #{ext}, please use one of: #{export_extensions_str}" unless plugin
         plugin.new
       end
 
