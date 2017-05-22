@@ -262,6 +262,34 @@ describe Base do
     end
   end
 
+  describe ".is_text?" do
+    shared_examples "text extension matcher" do
+      before {
+        allow(Base).to receive(:match_import_plugin).with(ext) { plugin }
+      }
+
+      it "identifies text extensions" do
+        expect(Base.is_text?(ext)).to eq(is_text)
+      end
+    end
+
+    context "if the extension matches a text plugin" do
+      let(:ext) { 'text_ext' }
+      let(:plugin) { RayyanFormats::Plugins::PlainText }
+      let(:is_text) { true }
+
+      it_behaves_like "text extension matcher"
+    end
+
+    context "if the extension does not match a text plugin" do
+      let(:ext) { 'binary_ext' }
+      let(:plugin) { RayyanFormats::Plugins::TestCore }
+      let(:is_text) { false }
+
+      it_behaves_like "text extension matcher"
+    end
+  end
+
   describe ".import" do
     let(:source_name) { "source_name.ext" }
     let(:content) { "place commercial here ;)" }

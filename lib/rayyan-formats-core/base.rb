@@ -57,6 +57,10 @@ module RayyanFormats
         .grep(Class)
       end
 
+      def is_text?(ext)
+        match_import_plugin(ext) == RayyanFormats::Plugins::PlainText
+      end
+
       def import(source, &block)
         filename = source.name
         original_ext = File.extname(filename).delete('.')
