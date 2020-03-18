@@ -24,6 +24,8 @@ module RayyanFormats
         location
         abstract
         notes
+        pubmed_id
+        pmc_id
       ).join(', ') + ' in any order'
 
       MAX_CSV_ROWS_DETECT = 5
@@ -64,6 +66,9 @@ module RayyanFormats
           target.publisher_location = article[:location]
           target.abstracts = [article[:abstract]].compact
           target.notes = try_join_arr(article[:notes])
+          target.article_ids = article_ids_headers.map do |idtype|
+            { idtype: idtype, value: article[idtype] } if article[idtype]
+          end.compact
 
           block.call(target, total)
         end
@@ -71,7 +76,7 @@ module RayyanFormats
 
       do_export do |target, options|
         header = options[:include_header] ? emit_header : ''
-        body = target.nil? ? '' : [
+        body = target.nil? ? '' : ([
           target.sid,
           target.title,
           target.date_array ? target.date_array[0] : nil,
@@ -89,15 +94,20 @@ module RayyanFormats
           target.publisher_location,
           get_abstracts(target, options){|abstracts| abstracts.join("\n").strip},
           target.notes
-        ].to_csv
+        ] + (target.article_ids || []).map { |id_obj| id_obj[:value] }
+        ).to_csv
         header + body
       end
 
       class << self
         private
 
+        def article_ids_headers
+          %i[pubmed_id pmc_id]
+        end
+
         def emit_header
-          [
+          ([
             "key",
             "title",
             "year",
@@ -114,8 +124,9 @@ module RayyanFormats
             "publisher",
             "location",
             "abstract",
-            "notes"
-          ].to_csv
+            "notes",
+          ] + article_ids_headers.map(&:to_s)
+          ).to_csv
         end
       end
 
