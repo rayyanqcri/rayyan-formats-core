@@ -76,7 +76,7 @@ module RayyanFormats
 
       do_export do |target, options|
         header = options[:include_header] ? emit_header : ''
-        body = target.nil? ? '' : ([
+        body_array = target.nil? ? [] : [
           target.sid,
           target.title,
           target.date_array ? target.date_array[0] : nil,
@@ -94,8 +94,17 @@ module RayyanFormats
           target.publisher_location,
           get_abstracts(target, options){|abstracts| abstracts.join("\n").strip},
           target.notes
-        ] + (target.article_ids || []).map { |id_obj| id_obj[:value] }
-        ).to_csv
+        ]
+
+        # Generate article ids from target to append to body
+        article_ids = article_ids_headers.map do |idtype|
+          id_obj = target.article_ids&.detect do |target_id_obj|
+            target_id_obj[:idtype] == idtype
+          end
+          id_obj&.dig(:value)
+        end
+        body = (body_array + article_ids).to_csv
+
         header + body
       end
 
