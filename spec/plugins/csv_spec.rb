@@ -80,16 +80,20 @@ describe RayyanFormats::Plugins::CSV do
       t.publisher_location = 'location1'
       t.abstracts = ['abstract1', 'abstract2']
       t.notes = 'notes1'
+      t.article_ids = [
+        { idtype: :pubmed_id, value: 'pubmed_id1' },
+        { idtype: :pmc_id, value: 'pmc_id1' }
+      ]
       t
     }
     let(:target_s_abstracts) {
-      "key1,title1,2017,5,4,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,\"abstract1\nabstract2\",notes1\n"
+      "key1,title1,2017,5,4,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,\"abstract1\nabstract2\",notes1,pubmed_id1,pmc_id1\n"
     }
     let(:target_s) {
-      "key1,title1,2017,5,4,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,,notes1\n"
+      "key1,title1,2017,5,4,journal1,issn1,1,10,pages1,\"al1, af1 and al2, af2\",url1,lang1,publisher1,location1,,notes1,pubmed_id1,pmc_id1\n"
     }
     let(:header) {
-      "key,title,year,month,day,journal,issn,volume,issue,pages,authors,url,language,publisher,location,abstract,notes\n"
+      "key,title,year,month,day,journal,issn,volume,issue,pages,authors,url,language,publisher,location,abstract,notes,pubmed_id,pmc_id\n"
     }
 
     it "emits header if specified" do
@@ -107,6 +111,6 @@ describe RayyanFormats::Plugins::CSV do
       expect(output).to eq(header + target_s)
     end
 
-    it_behaves_like "correct target emitter"   
+    it_behaves_like "correct target emitter"
   end
 end

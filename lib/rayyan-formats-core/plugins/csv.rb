@@ -76,34 +76,40 @@ module RayyanFormats
 
       do_export do |target, options|
         header = options[:include_header] ? emit_header : ''
-        body_array = target.nil? ? [] : [
-          target.sid,
-          target.title,
-          target.date_array ? target.date_array[0] : nil,
-          target.date_array ? target.date_array[1] : nil,
-          target.date_array ? target.date_array[2] : nil,
-          target.journal_title,
-          target.journal_issn,
-          target.jvolume && target.jvolume > 0 ? target.jvolume : nil,
-          target.jissue && target.jissue > 0 ? target.jissue : nil,
-          target.pagination,
-          target.authors.join(' and '),
-          target.url,
-          target.language,
-          target.publisher_name,
-          target.publisher_location,
-          get_abstracts(target, options){|abstracts| abstracts.join("\n").strip},
-          target.notes
-        ]
+        if target.nil?
+          body = ''
+        else
+          body_array = [
+            target.sid,
+            target.title,
+            target.date_array ? target.date_array[0] : nil,
+            target.date_array ? target.date_array[1] : nil,
+            target.date_array ? target.date_array[2] : nil,
+            target.journal_title,
+            target.journal_issn,
+            target.jvolume && target.jvolume > 0 ? target.jvolume : nil,
+            target.jissue && target.jissue > 0 ? target.jissue : nil,
+            target.pagination,
+            target.authors.join(' and '),
+            target.url,
+            target.language,
+            target.publisher_name,
+            target.publisher_location,
+            get_abstracts(target, options){|abstracts| abstracts.join("\n").strip},
+            target.notes
+          ]
 
-        # Generate article ids from target to append to body
-        article_ids = article_ids_headers.map do |idtype|
-          id_obj = target.article_ids&.detect do |target_id_obj|
-            target_id_obj[:idtype] == idtype
+          # Generate article ids from target
+          article_ids = article_ids_headers.map do |idtype|
+            id_obj = target.article_ids&.detect do |target_id_obj|
+              target_id_obj[:idtype] == idtype
+            end
+            id_obj&.dig(:value)
           end
-          id_obj&.dig(:value)
+
+          # Append article ids to body
+          body = (body_array + article_ids).to_csv
         end
-        body = (body_array + article_ids).to_csv
 
         header + body
       end
