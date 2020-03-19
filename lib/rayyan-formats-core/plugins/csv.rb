@@ -24,6 +24,8 @@ module RayyanFormats
         location
         abstract
         notes
+        pubmed_id
+        pmc_id
       ).join(', ') + ' in any order'
 
       MAX_CSV_ROWS_DETECT = 5
@@ -64,6 +66,9 @@ module RayyanFormats
           target.publisher_location = article[:location]
           target.abstracts = [article[:abstract]].compact
           target.notes = try_join_arr(article[:notes])
+          target.article_ids = article_ids_headers.map do |idtype|
+            { idtype: idtype, value: article[idtype] } if article[idtype]
+          end.compact
 
           block.call(target, total)
         end
@@ -71,7 +76,7 @@ module RayyanFormats
 
       do_export do |target, options|
         header = options[:include_header] ? emit_header : ''
-        body = target.nil? ? '' : [
+        body_array = target.nil? ? [] : [
           target.sid,
           target.title,
           target.date_array ? target.date_array[0] : nil,
@@ -89,15 +94,29 @@ module RayyanFormats
           target.publisher_location,
           get_abstracts(target, options){|abstracts| abstracts.join("\n").strip},
           target.notes
-        ].to_csv
+        ]
+
+        # Generate article ids from target to append to body
+        article_ids = article_ids_headers.map do |idtype|
+          id_obj = target.article_ids&.detect do |target_id_obj|
+            target_id_obj[:idtype] == idtype
+          end
+          id_obj&.dig(:value)
+        end
+        body = (body_array + article_ids).to_csv
+
         header + body
       end
 
       class << self
         private
 
+        def article_ids_headers
+          %i[pubmed_id pmc_id]
+        end
+
         def emit_header
-          [
+          ([
             "key",
             "title",
             "year",
@@ -114,8 +133,9 @@ module RayyanFormats
             "publisher",
             "location",
             "abstract",
-            "notes"
-          ].to_csv
+            "notes",
+          ] + article_ids_headers.map(&:to_s)
+          ).to_csv
         end
       end
 

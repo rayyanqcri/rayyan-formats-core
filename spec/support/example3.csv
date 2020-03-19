@@ -1,0 +1,3 @@
+key,notes,title,authors,journal,issn,volume,issue,pages,year,month,day,publisher,location,language,url,abstract,pubmed_id
+key1,notes1,title1,"a1l, a1f and a2l, a2f ; a3l, a3f",journal1,issn1,1,10,pages1,2017,5,4,publisher1,location1,lang1,url1,abstract1,pubmed_id1
+key2,,title2,author2,,,,,,,,,,,,,,pubmed_id2
