@@ -90,7 +90,7 @@ module RayyanFormats
             target.jvolume && target.jvolume > 0 ? target.jvolume : nil,
             target.jissue && target.jissue > 0 ? target.jissue : nil,
             target.pagination,
-            target.authors.join(' and '),
+            target.authors&.join(' and '),
             target.url,
             target.language,
             target.publisher_name,
