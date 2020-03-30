@@ -102,7 +102,7 @@ module RayyanFormats
           # Generate article ids from target
           article_ids = article_ids_headers.map do |idtype|
             id_obj = target.article_ids&.detect do |target_id_obj|
-              target_id_obj[:idtype] == idtype
+              target_id_obj[:idtype].to_s == idtype.to_s
             end
             id_obj&.dig(:value)
           end
