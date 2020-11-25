@@ -55,6 +55,9 @@ describe RayyanFormats::Plugins::CSV do
           expect(target.publisher_location).to eq("location1")
           expect(target.abstracts).to eq(["abstract1"])
           expect(target.notes).to eq("notes1")
+        else
+          # test authors with `and` in their name
+          expect(target.authors).to eq(["Bourne, Philip E", "Sette, Alessandro"])
         end
         first_line = false
       end

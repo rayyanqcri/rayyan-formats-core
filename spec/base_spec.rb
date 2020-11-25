@@ -7,7 +7,7 @@ module RayyanFormats
       title 'test title'
       extension 'test extension'
       description 'test description'
-      do_import do |body, filename, &block|
+      do_import do |body, filename, converter, &block|
         next body * 2
       end
     end
@@ -18,7 +18,7 @@ module RayyanFormats
       detect do |first_line, lines|
         next first_line
       end
-      do_import do |body, filename, &block|; end
+      do_import do |body, filename, converter, &block|; end
       do_export do |body, filename, &block|
         next body * 3
       end
@@ -293,6 +293,8 @@ describe Base do
   describe ".import" do
     let(:source_name) { "source_name.ext" }
     let(:content) { "place commercial here ;)" }
+    let(:converter) { ->(body, ext) { "converted #{body}.#{ext}" } }
+    let(:converted_content) { "converted place commercial here ;).ext" }
     let(:source_attachment) { double(size: 100, close: true, read: content) }
     let(:source) { double(name: source_name, attachment: source_attachment) }
     let(:plugin) { double }
@@ -324,9 +326,18 @@ describe Base do
         allow(Base).to receive(:max_file_size) { 999 } # big enough
       }
 
-      it "delegates to the plugin do_import" do
-        expect(plugin).to receive(:do_import).with(content, source_name)
-        Base.import(source)
+      context "if there is no converter given" do
+        it "delegates to the plugin do_import" do
+          expect(plugin).to receive(:do_import).with(content, source_name, nil)
+          Base.import(source)
+        end
+      end
+
+      context "if a converter is given" do
+        it "calls the converter then delegates to the plugin do_import" do
+          expect(plugin).to receive(:do_import).with(converted_content, source_name, converter)
+          Base.import(source, converter)
+        end
       end
     end
   end
@@ -413,7 +424,7 @@ describe Base do
     let(:unique_ids) { 1.upto(export_times).map{|i| "#{base_id}#{i}"} }
 
     it "returns a new unique_id each time" do
-      export_times.times{|i| expect(plugin_instance.get_unique_id).to eq(unique_ids[i])} 
+      export_times.times{|i| expect(plugin_instance.get_unique_id).to eq(unique_ids[i])}
     end
   end
 

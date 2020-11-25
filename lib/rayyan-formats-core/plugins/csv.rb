@@ -59,7 +59,7 @@ module RayyanFormats
           target.jvolume = article[:volume].to_i rescue 0
           target.jissue = (article[:issue] || article[:number]).to_i rescue 0
           target.pagination = article[:pages]
-          target.authors = article[:authors].split(/\s*;\s*|\band\b/) if article[:authors]
+          target.authors = article[:authors].split(/\s*;\s*|\s*\band\b\s*/) if article[:authors]
           target.url = article[:url]
           target.language = article[:language]
           target.publisher_name = article[:publisher]

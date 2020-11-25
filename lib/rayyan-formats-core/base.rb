@@ -61,7 +61,9 @@ module RayyanFormats
         match_import_plugin(ext) == RayyanFormats::Plugins::PlainText
       end
 
-      def import(source, &block)
+      # converter is a lambda(body, ext) that returns converted body
+      # Example for no-op lambda: Base.import(source, ->(body, ext) { body })
+      def import(source, converter = nil, &block)
         filename = source.name
         original_ext = File.extname(filename).delete('.')
         plugin = match_import_plugin(original_ext)
@@ -71,7 +73,9 @@ module RayyanFormats
         file = source.attachment
         raise "The file is too big to process, should be less than #{max_file_size} bytes in size" if file.size > max_file_size
 
-        plugin.do_import(file.read, filename, &block)
+        body = file.read
+        body = converter.call(body, original_ext) if converter
+        plugin.do_import(body, filename, converter, &block)
       ensure
         file.close if file
       end

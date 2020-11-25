@@ -3,7 +3,7 @@
 
 # RayyanFormats
 
-Rayyan core plugin for import/export of reference file formats. It comes with wrapped text and CSV plugins. Similarly, more formats can be supported and enabled via the client program. Usually, reference files contain articles with common attributes like `title`, `journal`, `publication date`, `authors`, ... etc. However, these attributes are represented in different ways within different formats. The main goal of this core plugin is to abstract the syntactical and semantic extraction of these attributes. 
+Rayyan core plugin for import/export of reference file formats. It comes with wrapped text and CSV plugins. Similarly, more formats can be supported and enabled via the client program. Usually, reference files contain articles with common attributes like `title`, `journal`, `publication date`, `authors`, ... etc. However, these attributes are represented in different ways within different formats. The main goal of this core plugin is to abstract the syntactical and semantic extraction of these attributes.
 
 ## Installation
 
@@ -40,6 +40,11 @@ To do the actual importing of reference files:
       puts "Found target: #{target}. Total: #{total}."
     }
 
+If you want to convert the input before importing it, for example to convert
+non-UTF8 encoded files to UTF8 encoded files, add a converter lambda as follows:
+
+    RayyanFormats::Base.import(source, ->(body, ext){ #my_converter_logic_here })
+
 ### Exporting
 
 To do the actual exporting of reference files, assuming articles are stored
@@ -74,13 +79,36 @@ with the corresponding getter method. For example:
     t.c = [1, 2, 3]
     puts t.c.inspect # [1, 2, 3]
 
-## Testing
+## Development and Testing
 
-    rspec
+To build for local development and testing (requires Docker):
 
-Or
+```bash
+docker build . -t rayyan-formats-core:1
+```
 
-    rake
+To run the tests:
+
+```bash
+docker run -it --rm -v $PWD:/home rayyan-formats-core:1
+```
+
+This will allow you to edit files and re-run the tests without rebuilding
+the image.
+
+## Publishing the gem
+
+```bash
+docker build . -t rayyan-formats-core:1
+docker run -it --rm rayyan-formats-core:1 /home/publish.sh
+```
+
+Enter your email and password when prompted. If you want to skip interactive
+login, supply `RUBYGEMS_API_KEY` as an additional argument:
+
+```bash
+docker run -it --rm -e RUBYGEMS_API_KEY=YOUR_RUBYGEMS_API_KEY rayyan-formats-core:1 /home/publish.sh
+```
 
 ## Contributing
 
