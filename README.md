@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/rayyanqcri/rayyan-formats-core.svg?branch=master)](https://travis-ci.org/rayyanqcri/rayyan-formats-core)
-[![Coverage Status](https://coveralls.io/repos/github/rayyanqcri/rayyan-formats-core/badge.svg?branch=master)](https://coveralls.io/github/rayyanqcri/rayyan-formats-core?branch=master)
+[![Build Status](https://travis-ci.org/rayyansys/rayyan-formats-core.svg?branch=master)](https://travis-ci.org/rayyansys/rayyan-formats-core)
+[![Coverage Status](https://coveralls.io/repos/github/rayyansys/rayyan-formats-core/badge.svg?branch=master)](https://coveralls.io/github/rayyansys/rayyan-formats-core?branch=master)
 
 # RayyanFormats
 
@@ -23,7 +23,7 @@ Or install it yourself as:
 
 Without any additional plugins, this core plugin adds support for CSV format with `.csv` extension or CSV format wrapped in a text file with `.txt` extension.
 
-To configure the plugin with additional formats, check the documentation for the [rayyan-formats-plugins](https://github.com/rayyanqcri/rayyan-formats-plugins) gem. Typically, in Rails, all configuration should go into a separate initializer (e.g. `config/initializers/rayyan-formats.rb`.
+To configure the plugin with additional formats, check the documentation for the [rayyan-formats-plugins](https://github.com/rayyansys/rayyan-formats-plugins) gem. Typically, in Rails, all configuration should go into a separate initializer (e.g. `config/initializers/rayyan-formats.rb`.
 
 By default, the plugin will only process files no bigger than 10 megabytes. To override this limit, use the following configuration parameter:
 
